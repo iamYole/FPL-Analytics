@@ -409,86 +409,6 @@ def extract_league_data(league_id,conn):
     except Exception as e:
         logger.error(f"Error downloading league data {e}")
 
-
-# def extract_gw_data(league_id,player_ids,conn):
-#     """ Extracts information for game week data"""
-#     logger.info(" ***Extracting information for game week data*** ")
-#     all_data = {}
-#     total_players = len(player_ids)
-
-#     for player in player_ids:
-#         game_week_URL = f"https://fantasy.premierleague.com/api/entry/{player}/history"
-#         try:
-#             response = requests.get(game_week_URL)
-#             response.raise_for_status()  # ✅ fail fast if API request fails
-#             data = response.json()['current']
-
-#             if not data:
-#                 logger.warning(f"No data found for {player}")
-#                 continue
-
-#             all_data[player] = data
-#             # logger.info(f"Extracted data for player {player}")
-#         except Exception as e:
-#             logger.error(f"Error downloading game week data for player: {player} {e}")
-
-#     try:
-#         gw_data = []
-#         cursor = conn.cursor()
-#         qry = """
-#             INSERT INTO fpl.gw_events (game_week,weeks_points,total_points,bank,transfers,transfer_cost,gross_points,
-# 							bench_points,team_id,league_id,overall_rank, team_value,league_rank,last_league_rank,league_rank_sort)
-# 		            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-#             ON CONFLICT (game_week,team_id,league_id) DO UPDATE SET
-#                             weeks_points = EXCLUDED.weeks_points,
-#                             total_points = EXCLUDED.total_points,
-#                             bank = EXCLUDED.bank,
-#                             transfers = EXCLUDED.transfers,
-#                             transfer_cost = EXCLUDED.transfer_cost,
-#                             gross_points = EXCLUDED.gross_points,
-#                             bench_points = EXCLUDED.bench_points,
-#                             overall_rank = EXCLUDED.overall_rank,
-#                             team_value = EXCLUDED.team_value,
-#                             league_rank = EXCLUDED.league_rank,
-#                             last_league_rank = EXCLUDED.last_league_rank,
-#                             league_rank_sort = EXCLUDED.league_rank_sort;;
-#             """
-#         for player_id, results in all_data.items():
-#             for result in results:
-#                 # calculate gross points by adding transfer costs to total point
-#                 gross_point = result["points"] + result["event_transfers_cost"] 
-
-#                 #obtain information of a single player in a league to add the 
-#                 #players league performance to the game week table
-#                 player_ranks = extract_player(league_id,player_id)
-#                 league_rank = player_ranks[0].get('rank')
-#                 last_league_rank = player_ranks[0].get('last_rank')
-#                 league_sort_rank = player_ranks[0].get('rank_sort')
-
-#                 values = (
-#                     result["event"],
-#                     result["points"],
-#                     result["total_points"],
-#                     result["bank"],
-#                     result["event_transfers"],
-#                     result["event_transfers_cost"],
-#                     gross_point,
-#                     result["points_on_bench"],
-#                     player_id,
-#                     int(league_id),
-#                     result["overall_rank"],
-#                     result['value'],
-#                     league_rank,
-#                     last_league_rank,
-#                     league_sort_rank
-#                 )
-#             cursor.execute(qry, values)
-#         conn.commit()
-#         logger.info("Gameweek data saved successfully")       
-#     except Exception as e:
-#         logger.error(f"Error saving game week data {e}")
-
-
 def extract_gw_data(league_id, player_ids, conn):
     """ Extracts information for game week data with progress logging """
     import time
@@ -582,8 +502,6 @@ def extract_gw_data(league_id, player_ids, conn):
     except Exception as e:
         logger.error(f"Error saving game week data {e}")
 
-
-
 def main():
     conn = connect_to_db()
     league_id = os.getenv("LEAGUE_ID")
@@ -596,8 +514,5 @@ def main():
     player_ids=extract_players_info(league_id=league_id, conn=conn)
     extract_gw_data(league_id,player_ids, conn=conn)
     
-   
-
-
 if __name__ == "__main__":
     main()
