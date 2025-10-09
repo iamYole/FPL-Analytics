@@ -355,9 +355,11 @@ def extract_players_info(league_id, conn):
                     INSERT INTO fpl.player_details (team_id,player_name,team_name,total_point)
                                     VALUES(%s,%s,%s,%s)
                     ON CONFLICT (team_id) DO UPDATE
-                    SET team_name = EXCLUDED.team_name
-                    WHERE fpl.player_details.team_name IS DISTINCT FROM EXCLUDED.team_name;
+                    SET team_name = EXCLUDED.team_name,
+                    total_point = EXCLUDED.total_point;      
                     """
+            # WHERE fpl.player_details.team_name IS DISTINCT FROM EXCLUDED.team_name;
+
             players_data = [(row["entry"],row["player_name"],row["entry_name"],row["event_total"] ) for row in all_results]
             cursor.executemany(qry,players_data)
             conn.commit()
@@ -513,6 +515,6 @@ def main():
     extract_league_data(league_id=league_id, conn=conn)
     player_ids=extract_players_info(league_id=league_id, conn=conn)
     extract_gw_data(league_id,player_ids, conn=conn)
-    
+
 if __name__ == "__main__":
     main()
