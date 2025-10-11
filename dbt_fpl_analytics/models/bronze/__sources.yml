@@ -1,0 +1,13 @@
+version 2:
+
+sources:
+    - name: fpl_analytics_raw
+      database: dbt-fpl-analytics
+      schema: fpl_analytics_raw
+      tables:
+        - name: teams
+        - name: league_details
+        - name: gw_events
+        - name: player_details
+        - name: elements_type
+        - name: elements_details
