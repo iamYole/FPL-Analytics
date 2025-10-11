@@ -3,3 +3,4 @@ venv
 .secret
 logs
 .DS_Store
+ .secrets/
